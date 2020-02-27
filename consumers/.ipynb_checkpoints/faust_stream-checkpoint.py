@@ -5,7 +5,9 @@ import faust
 
 
 logger = logging.getLogger(__name__)
-
+RED = 'red'
+GREEN = 'green'
+BLUE = 'blue'
 
 # Faust will ingest records from Kafka in this format
 class Station(faust.Record):
@@ -29,35 +31,31 @@ class TransformedStation(faust.Record):
     line: str
 
 
-# TODO: Define a Faust Stream that ingests data from the Kafka Connect stations topic and
-#   places it into a new topic with only the necessary information.
+
 app = faust.App("stations-stream", broker="kafka://localhost:9092", store="memory://")
 topic = app.topic("com.udacity.connect.stations", value_type=Station)
-# TODO: Define the output Kafka Topic
-out_topic = app.topic("com.udacity.stations_enriched", partitions=1)
-# TODO: Define a Faust Table
+
+out_topic = app.topic("com.udacity.connect.stations.transformed", partitions=1, value_type=TransformedStation)
+
 table = app.Table(
     "transformed_station",
-    default=Station,
+    default=TransformedStation,
     partitions=1,
     changelog_topic=out_topic,
 )
 
 
-#
-#
-# TODO: Using Faust, transform input `Station` records into `TransformedStation` records. Note that
-# "line" is the color of the station. So if the `Station` record has the field `red` set to true,
-# then you would set the `line` of the `TransformedStation` record to the string `"red"`
-#
-#
 @app.agent(topic)
 async def transforms(stations):
     async for station in stations:
-        transformed_station = TransformedStation(
-            station_id= station.station_id, 
-            
+        line = RED if station.red else BLUE if station.blue else GREEN
+        table[station.station_id] = TransformedStation(
+            station_id=station.station_id, 
+            station_name=station.name,
+            order=station.order,
+            line=line            
         )
+        
         
 
 

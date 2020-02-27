@@ -23,14 +23,25 @@ KSQL_URL = "http://localhost:8088"
 
 KSQL_STATEMENT = """
 CREATE TABLE turnstile (
-    ???
+    station_id int,
+    station_name varchar,
+    line varchar    
 ) WITH (
-    ???
+    KAFKA_TOPIC='com.udacity.stations.turnstiles',
+    VALUE_FORMAT='AVRO',
+    KEY='station_id'
 );
 
 CREATE TABLE turnstile_summary
-WITH (???) AS
-    ???
+WITH (VALUE_FORMAT='JSON') AS
+    SELECT 
+        station_id,
+        station_name,
+        count(station_id)
+    from
+        turnstile
+    group by
+        station_id
 """
 
 
@@ -51,9 +62,13 @@ def execute_statement():
             }
         ),
     )
+    
+    try:
+        resp.raise_for_status()
+    except:
+        print(f"Failed to send data to KSQL {json.dumps(resp.json(), indent=2)}")
+        exit(1)
 
-    # Ensure that a 2XX status code was returned
-    resp.raise_for_status()
 
 
 if __name__ == "__main__":
