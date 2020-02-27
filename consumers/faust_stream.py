@@ -38,7 +38,7 @@ topic = app.topic("com.udacity.connect.stations", value_type=Station)
 out_topic = app.topic("com.udacity.connect.stations.transformed", partitions=1, value_type=TransformedStation)
 
 table = app.Table(
-    "transformed_station",
+    "TransformedStation",
     default=TransformedStation,
     partitions=1,
     changelog_topic=out_topic,

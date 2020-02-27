@@ -29,7 +29,7 @@ class Station(Producer):
         )
 
         
-        topic_name = f"com.udacity.stations.arrivals"
+        topic_name = "com.udacity.stations.arrivals"
         super().__init__(
             topic_name,
             key_schema=Station.key_schema,

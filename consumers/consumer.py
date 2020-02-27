@@ -13,8 +13,6 @@ logger = logging.getLogger(__name__)
 BOOTSTRAP_SERVERS = ['PLAINTEXT://localhost:9092', 'PLAINTEXT://localhost:9093', 'PLAINTEXT://localhost:9094']
 SCHEMA_REGISTRY_URL = 'http://localhost:8081'
 
-OFFSET_BEGINNING = 'OFFSET_BEGINNING'
-
 
 class KafkaConsumer:
     """Defines the base kafka consumer class"""
@@ -86,7 +84,7 @@ class KafkaConsumer:
             logger.error(f"error from consumer {message.error()}")
         else:
             try:
-                logger.info(f"_consume received {message.value()}")
+                self.message_handler(message.value())
                 return 1
             except KeyError as e:
                 logger.error(f"Failed to unpack message {e}")
