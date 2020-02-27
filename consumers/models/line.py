@@ -56,7 +56,7 @@ class Line:
 
     def process_message(self, message):
         """Given a kafka message, extract data"""        
-        if "com.udacity.connect.stations.transformed" == message.topic(): 
+        if "org.chicago.cta.stations.table.v1" == message.topic(): 
             try:
                 value = json.loads(message.value())
                 self._handle_station(value)

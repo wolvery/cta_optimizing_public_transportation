@@ -69,14 +69,7 @@ class KafkaConsumer:
             await gen.sleep(self.sleep_secs)
 
     def _consume(self):
-        """Polls for a message. Returns 1 if a message was received, 0 otherwise"""
-        #
-        #
-        # TODO: Poll Kafka for messages. Make sure to handle any errors or exceptions.
-        # Additionally, make sure you return 1 when a message is processed, and 0 when no message
-        # is retrieved.
-        #
-        #        
+        """Polls for a message. Returns 1 if a message was received, 0 otherwise"""     
         message = consumer.poll(self.sleep_secs)
         if message is None:
             logger.debug("no message received by consumer")

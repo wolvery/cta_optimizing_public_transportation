@@ -37,7 +37,7 @@ WITH (VALUE_FORMAT='JSON') AS
     SELECT 
         station_id,
         station_name,
-        count(station_id)
+        count(station_id) as COUNT
     from
         turnstile
     group by
