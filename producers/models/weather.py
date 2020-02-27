@@ -64,13 +64,7 @@ class Weather(Producer):
 
     def run(self, month):
         self._set_weather(month)
-
-        logger.info("weather kafka proxy sending message")
-        resp = requests.post(
-            f"{Weather.rest_proxy_url}/topics/{self.topic_name}",        
-            headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
-            data=json.dumps(
-                {
+        data = {
                     "key_schema": Weather.key_schema,
                     "value_schema": Weather.value_schema, 
                     "records": [{
@@ -80,7 +74,11 @@ class Weather(Producer):
                             "status": self.status.name
                         }}]                   
                 }
-            ),
+        logger.info("weather kafka proxy sending message", f"{Weather.rest_proxy_url}/topics/{self.topic_name}", data)
+        resp = requests.post(
+            f"{Weather.rest_proxy_url}/topics/{self.topic_name}",        
+            headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
+            data=json.dumps(data),
         )
         try:
             resp.raise_for_status()

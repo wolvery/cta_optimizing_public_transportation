@@ -30,7 +30,7 @@ class Turnstile(Producer):
         )
         
         super().__init__(
-            f"com.udacity.turnstiles", 
+            f"com.udacity.stations.turnstiles", 
             key_schema=Turnstile.key_schema,
             value_schema=Turnstile.value_schema, 
             num_partitions=3,
@@ -48,8 +48,8 @@ class Turnstile(Producer):
                 topic=self.topic_name,
                 key={"timestamp": self.time_millis()},
                 value={
-                    station_id=self.station.station_id,
-                    station_name=self.station.name,
-                    line=self.station.color
+                    'station_id':self.station.station_id,
+                    'station_name':self.station.name,
+                    'line':self.station.color
                 },
             )

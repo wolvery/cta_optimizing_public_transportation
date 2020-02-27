@@ -5,7 +5,7 @@ import time
 
 from confluent_kafka import avro
 from confluent_kafka.admin import AdminClient, NewTopic
-from confluent_kafka.avro import AvroProducer
+from confluent_kafka.avro import AvroProducer, CachedSchemaRegistryClient
 
 logger = logging.getLogger(__name__)
 
@@ -33,40 +33,47 @@ class Producer:
         self.num_partitions = num_partitions
         self.num_replicas = num_replicas
         
-        schema_registry = CachedSchemaRegistryClient(SCHEMA_REGISTRY_URL)
-        
         self.broker_properties = {
-            'bootstrap.servers': BOOTSTRAP_SERVERS            
-        }              
+            "bootstrap.servers": ','.join(BOOTSTRAP_SERVERS)
+        }             
+        schema_registry = CachedSchemaRegistryClient(SCHEMA_REGISTRY_URL)
 
         # If the topic does not already exist, try to create it
         if self.topic_name not in Producer.existing_topics:
             self.create_topic()
             Producer.existing_topics.add(self.topic_name)
         
-        self.producer = AvroProducer(self.broker_properties, schema_registry= SCHEMA_REGISTRY_URL)
+        self.producer = AvroProducer(self.broker_properties, 
+                                     schema_registry=schema_registry,
+                                     default_key_schema=self.key_schema, 
+                                     default_value_schema=self.value_schema)
         
 
     def create_topic(self):
         """Creates the producer topic if it does not already exist"""        
-        new_topics = [NewTopic(topic, num_partitions=3, replication_factor=1) for topic in [self.topic_name]]
-        admin_client = AdminClient(self.broker_properties)
-        processes_to_create = admin_client.create_topic(new_topics=new_topics)
         
-        for topic, process in processes_to_create.items():
-        try:
-            process.result()  # The result itself is None
-            logger.info("Topic {} created".format(topic))
-        except Exception as e:
-            print("Failed to create topic {}: {}".format(topic, e))
+        admin_client = AdminClient(self.broker_properties)
+        if self.topic_name not in admin_client.list_topics().topics:
+            new_topics = [NewTopic(topic=self.topic_name, 
+                                   num_partitions=self.num_partitions, 
+                                   replication_factor=self.num_replicas)]
+            processes_to_create = admin_client.create_topics(new_topics=new_topics)
+
+            for topic, process in processes_to_create.items():
+                try:
+                    process.result()  # The result itself is None
+                    logger.info("Topic {} created".format(topic))
+                except Exception as e:
+                    print("Failed to create topic {}: {}".format(topic, e))
 
     def time_millis(self):
         return int(round(time.time() * 1000))
 
     def close(self):
         """Prepares the producer for exit by cleaning up the producer"""        
-        self.producer.flush()
-        logger.info("producer closed")
+        if self.producer is not None:
+            self.producer.flush()
+            logger.info("producer closed")
 
     def time_millis(self):
         """Use this function to get the key for Kafka Events"""
