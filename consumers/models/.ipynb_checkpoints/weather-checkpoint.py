@@ -15,7 +15,10 @@ class Weather:
 
     def process_message(self, message):
         """Handles incoming weather data"""
-        logger.info("weather process_message")
-        json_data = json.loads(message.value())
-        self.temperature = json_data.get("temperature")
-        self.status = json_data.get("status")
+        if "com.udacity.weather.v1" == message.topic():
+            logger.info("weather process_message")
+            json_data = json.loads(message.value())
+            self.temperature = json_data.get("temperature")
+            self.status = json_data.get("status")
+        else:
+            logger.info("it is not an weather message")
