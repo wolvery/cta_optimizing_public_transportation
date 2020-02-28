@@ -31,6 +31,16 @@ class Lines:
                 self.blue_line.process_message(message)
             else:
                 logger.debug("discarding unknown line msg %s", value["line"])
+        elif "com.udacity.station.arrivals.v1" == message.topic():
+            value = json.loads(message.value())
+            if value.get("green"):
+                self.green_line.process_message(message)
+            elif value.get("red"):
+                self.red_line.process_message(message)
+            elif value.get("blue"):
+                self.blue_line.process_message(message)
+            else:
+                logger.debug("discarding unknown line msg %s", value["line"])
         elif "TURNSTILE_SUMMARY" == message.topic():
             self.green_line.process_message(message)
             self.red_line.process_message(message)
