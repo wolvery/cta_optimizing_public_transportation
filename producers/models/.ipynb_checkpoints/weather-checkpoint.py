@@ -32,7 +32,7 @@ class Weather(Producer):
     def __init__(self, month):
         
         super().__init__(
-            "com.udacity.weather.v1", 
+            "com-udacity-weather-v1", 
             key_schema=Weather.key_schema,
             value_schema=Weather.value_schema,
         )
@@ -59,13 +59,13 @@ class Weather(Producer):
             mode = -1.0
         elif month in Weather.summer_months:
             mode = 1.0
-        self.temp += min(max(-20.0, random.triangular(-10.0, 10.0, mode)), 100.0)
+        self.temp += min(max(-20.0, random.triangular(-10.0, 10.0, mode)), 100.0)        
         self.status = random.choice(list(Weather.status))
 
     def run(self, month):
         self._set_weather(month)
         data = {
-                    "key_schema": Weather.key_schema,
+                    
                     "value_schema": Weather.value_schema, 
                     "records": [{
                         "key": {"timestamp": self.time_millis()},
@@ -74,7 +74,7 @@ class Weather(Producer):
                             "status": self.status.name
                         }}]                   
                 }
-        logger.info("weather kafka proxy sending message", f"{Weather.rest_proxy_url}/topics/{self.topic_name}", data)
+        logger.info("weather kafka proxy sending message")
         resp = requests.post(
             f"{Weather.rest_proxy_url}/topics/{self.topic_name}",        
             headers={"Content-Type": "application/vnd.kafka.avro.v2+json"},
@@ -83,8 +83,7 @@ class Weather(Producer):
         try:
             resp.raise_for_status()
         except:
-            logger.error(f"Failed to send data to REST Proxy {json.dumps(resp.json(), indent=2)}")
-            exit(1)
+            logger.error(f"Failed to send data to REST Proxy {json.dumps(resp.json(), indent=2)}")            
             
 
         logger.debug(

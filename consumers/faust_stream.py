@@ -51,7 +51,7 @@ async def transforms(stations):
         line = RED if station.red else BLUE if station.blue else GREEN
         table[station.station_id] = TransformedStation(
             station_id=station.station_id, 
-            station_name=station.name,
+            station_name=station.station_name,
             order=station.order,
             line=line            
         )

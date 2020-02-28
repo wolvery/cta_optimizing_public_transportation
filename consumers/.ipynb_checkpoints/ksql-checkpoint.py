@@ -36,12 +36,11 @@ CREATE TABLE turnstile_summary
 WITH (VALUE_FORMAT='JSON') AS
     SELECT 
         station_id,
-        station_name,
-        count(station_id) as COUNT
+        count(*) as COUNT
     from
         turnstile
     group by
-        station_id
+        station_id;
 """
 
 
@@ -68,7 +67,8 @@ def execute_statement():
     except:
         print(f"Failed to send data to KSQL {json.dumps(resp.json(), indent=2)}")
         exit(1)
-
+        
+    logging.info("ksql finished...")
 
 
 if __name__ == "__main__":
